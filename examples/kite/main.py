@@ -38,8 +38,8 @@ from template_mpc import template_mpc
 from template_simulator import template_simulator
 
 """ User settings: """
-show_animation = True
-store_results = False
+show_animation = False
+store_results = True
 
 """
 Get configured do-mpc modules:
@@ -54,9 +54,9 @@ estimator = do_mpc.estimator.StateFeedback(model)
 Set initial state
 """
 
-theta_0 = 0.29359907+0.05
-phi_0 = 0.52791537
-psi_0 = 0.0
+theta_0 = 0.39359907+0.05
+phi_0 = 0.72791537
+psi_0 = 0.1
 x0 = np.array([theta_0, phi_0, psi_0]).reshape(-1,1)
 
 mpc.set_initial_state(x0, reset_history=True)
@@ -67,29 +67,50 @@ estimator.set_initial_state(x0, reset_history=True)
 Setup graphic:
 """
 fig, ax = plt.subplots(figsize=(8,5))
+color = plt.rcParams['axes.prop_cycle'].by_key()['color']
+
+phi_pred = mpc.data.prediction(('_x', 'phi'))[0]
+theta_pred = mpc.data.prediction(('_x', 'theta'))[0]
+pred_lines = ax.plot(phi_pred, theta_pred, color=color[0], linestyle='--', linewidth=1)
+
+phi = mpc.data['_x', 'phi']
+theta = mpc.data['_x', 'theta']
+
+res_lines = ax.plot(phi, theta, color=color[0])
+
 
 #fig, ax, graphics = do_mpc.graphics.default_plot(mpc.data, figsize=(8,5))
 
-graphics = do_mpc.graphics.Graphics(simulator.data)
-
-graphics.add_line(x = ('_x', 'phi'), y=('_x','theta'), axis=ax)
-
+# graphics = do_mpc.graphics.Graphics(simulator.data)
+#
+# graphics.add_line(x = ('_x', 'phi'), y=('_x','theta'), axis=ax)
+#
 plt.ion()
 
 """
 Run MPC main loop:
 """
 
-for k in range(150):
+for k in range(500):
     u0 = mpc.make_step(x0)
-    for i in range(3):
+    for m in range(3):
         y_next = simulator.make_step(u0)
     x0 = estimator.make_step(y_next)
 
     if show_animation:
-        graphics.plot_results()
-        #graphics.plot_predictions()
-        graphics.reset_axes()
+        phi_pred = mpc.data.prediction(('_x', 'phi'))[0]
+        theta_pred = mpc.data.prediction(('_x', 'theta'))[0]
+        for i in range(phi_pred.shape[1]):
+            pred_lines[i].set_data(phi_pred[:,i], theta_pred[:,i])
+        phi = mpc.data['_x', 'phi']
+        theta = mpc.data['_x', 'theta']
+        res_lines[0].set_data(phi, theta)
+        ax.relim()
+        ax.autoscale()
+
+        # graphics.plot_results()
+        # #graphics.plot_predictions()
+        # graphics.reset_axes()
         plt.show()
         plt.pause(0.01)
 
