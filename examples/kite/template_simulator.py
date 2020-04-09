@@ -41,14 +41,14 @@ def template_simulator(model):
         'integration_tool': 'cvodes',
         'abstol': 1e-10,
         'reltol': 1e-10,
-        't_step': 0.05
+        't_step': 0.15
     }
 
     simulator.set_param(**params_simulator)
 
     p_num = simulator.get_p_template()
-    p_num['E_0'] = 0.5
-    p_num['v_0'] = 200.0
+    p_num['E_0'] = 4
+    p_num['v_0'] = 7
 
     def p_fun(t_now):
         return p_num

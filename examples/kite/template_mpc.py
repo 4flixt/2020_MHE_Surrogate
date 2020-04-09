@@ -49,7 +49,7 @@ def template_mpc(model):
 
     mpc.set_param(**setup_mpc)
 
-    lterm = -model.aux['E']/1e4
+    lterm = -model.aux['T_F']/1e4
     mpc.set_objective(mterm=DM(0), lterm=lterm)
     mpc.set_rterm(u_tilde=0.5)
 

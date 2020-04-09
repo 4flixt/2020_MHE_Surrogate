@@ -64,7 +64,7 @@ def template_model():
 
     height_kite = L_tether * sin(theta) * cos(phi)
 
-    model.set_expression('E', E)
+    model.set_expression('T_F', T_F)
     model.set_expression('height_kite', height_kite)
 
 
