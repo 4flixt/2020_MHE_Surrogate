@@ -27,9 +27,10 @@ import pdb
 import sys
 sys.path.append('../../')
 import do_mpc
+from wind_model import Wind
 
 
-def template_simulator(model):
+def template_simulator(model, w_ref, E_0):
     """
     --------------------------------------------------------------------------
     template_simulator: tuning parameters
@@ -47,10 +48,18 @@ def template_simulator(model):
     simulator.set_param(**params_simulator)
 
     p_num = simulator.get_p_template()
-    p_num['E_0'] = 4
-    p_num['v_0'] = 7
+
+    wind = Wind(w_ref = w_ref, t_step = simulator.t_step)
+    simulator.E_0 = E_0
+    E_0_min = 0.8*E_0
+    E_0_max = 1.2*E_0
 
     def p_fun(t_now):
+        v_0 = wind.make_step()
+        simulator.E_0 += 0.01*np.random.randn()
+        simulator.E_0 = np.clip(simulator.E_0, E_0_min, E_0_max)
+        p_num['E_0'] = simulator.E_0 
+        p_num['v_0'] = v_0
         return p_num
 
     simulator.set_p_fun(p_fun)
