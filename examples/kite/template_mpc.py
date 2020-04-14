@@ -29,7 +29,7 @@ sys.path.append('../../')
 import do_mpc
 
 
-def template_mpc(model):
+def template_mpc(model, w_ref, E_0):
     """
     --------------------------------------------------------------------------
     template_mpc: tuning parameters
@@ -38,7 +38,7 @@ def template_mpc(model):
     mpc = do_mpc.controller.MPC(model)
 
     setup_mpc = {
-        'n_horizon': 80,
+        'n_horizon': 60,
         'n_robust': 0,
         'open_loop': 0,
         't_step': 0.15,
@@ -75,8 +75,8 @@ def template_mpc(model):
         maximum_violation = 10,
     )
 
-    E_0_values = np.array([4.0, 6.0])
-    v_0_values = np.array([7.0,13.0])
+    E_0_values = np.array([E_0])
+    v_0_values = np.array([w_ref, w_ref*0.8, w_ref*1.2])
 
     mpc.set_uncertainty_values([E_0_values, v_0_values])
 

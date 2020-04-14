@@ -39,24 +39,44 @@ from template_simulator import template_simulator
 
 """ User settings: """
 show_animation = False
+user_anim = True
 store_results = True
 
 """
 Get configured do-mpc modules:
 """
+w_ref = 10+5*np.random.rand()
+E_0 = 6+np.random.rand()
 
 model = template_model()
-mpc = template_mpc(model)
-simulator = template_simulator(model)
+mpc = template_mpc(model, w_ref, E_0)
+simulator = template_simulator(model, w_ref, E_0)
 estimator = do_mpc.estimator.StateFeedback(model)
 
 """
 Set initial state
 """
+# Derive initial state from bounds:
+lb_theta, ub_theta = mpc.bounds['lower','_x','theta'], mpc.bounds['upper','_x','theta']
+lb_phi, ub_phi = mpc.bounds['lower','_x','phi'], mpc.bounds['upper','_x','phi']
+lb_psi, ub_psi = mpc.bounds['lower','_x','psi'], mpc.bounds['upper','_x','psi']
+# with mean and radius:
+m_theta, r_theta = (ub_theta+lb_theta)/2, (ub_theta-lb_theta)/2
+m_phi, r_phi = (ub_phi+lb_phi)/2, (ub_phi-lb_phi)/2
+m_psi, r_psi = (ub_psi+lb_psi)/2, (ub_psi-lb_psi)/2
+# How close can the intial state be to the bounds?
+# tightness=1 -> Initial state could be on the bounds.
+# tightness=0 -> Initial state will be at the center of the feasible range.
+tightness = 0.8
+theta_0 = m_theta-tightness*r_theta+2*tightness*r_theta*np.random.rand()
+phi_0 = m_phi-tightness*r_phi+2*tightness*r_phi*np.random.rand()
+psi_0 = m_psi-tightness*r_psi+2*tightness*r_psi*np.random.rand()
 
-theta_0 = 0.39359907+0.05
-phi_0 = 0.72791537
-psi_0 = 0.1
+# Prevously (fixed) initial states:
+# theta_0 = 0.39359907+0.05
+# phi_0 = 0.72791537
+# psi_0 = 0.1
+
 x0 = np.array([theta_0, phi_0, psi_0]).reshape(-1,1)
 
 mpc.set_initial_state(x0, reset_history=True)
@@ -66,51 +86,53 @@ estimator.set_initial_state(x0, reset_history=True)
 """
 Setup graphic:
 """
-fig, ax = plt.subplots(figsize=(8,5))
-color = plt.rcParams['axes.prop_cycle'].by_key()['color']
+if user_anim:
+    fig, ax = plt.subplots(figsize=(8,5))
+    color = plt.rcParams['axes.prop_cycle'].by_key()['color']
 
-phi_pred = mpc.data.prediction(('_x', 'phi'))[0]
-theta_pred = mpc.data.prediction(('_x', 'theta'))[0]
-pred_lines = ax.plot(phi_pred, theta_pred, color=color[0], linestyle='--', linewidth=1)
+    phi_pred = mpc.data.prediction(('_x', 'phi'))[0]
+    theta_pred = mpc.data.prediction(('_x', 'theta'))[0]
+    pred_lines = ax.plot(phi_pred, theta_pred, color=color[0], linestyle='--', linewidth=1)
 
-phi = mpc.data['_x', 'phi']
-theta = mpc.data['_x', 'theta']
+    phi = mpc.data['_x', 'phi']
+    theta = mpc.data['_x', 'theta']
 
-res_lines = ax.plot(phi, theta, color=color[0])
+    res_lines = ax.plot(phi, theta, color=color[0])
+else:
+    # fig, ax = plt.subplots(2,figsize=(8,5))
+    # graphics = do_mpc.graphics.Graphics(simulator.data)
+    # graphics.add_line('_p', 'E_0', axis=ax[0])
+    # graphics.add_line('_p', 'v_0', axis=ax[1])
+    fig, ax, graphics = do_mpc.graphics.default_plot(simulator.data)
 
 
-#fig, ax, graphics = do_mpc.graphics.default_plot(mpc.data, figsize=(8,5))
-
-# graphics = do_mpc.graphics.Graphics(simulator.data)
-#
-# graphics.add_line(x = ('_x', 'phi'), y=('_x','theta'), axis=ax)
-#
 plt.ion()
 
 """
 Run MPC main loop:
 """
 
-for k in range(500):
+for k in range(700):
     u0 = mpc.make_step(x0)
-    for m in range(3):
-        y_next = simulator.make_step(u0)
+
+    y_next = simulator.make_step(u0)
     x0 = estimator.make_step(y_next)
 
     if show_animation:
-        phi_pred = mpc.data.prediction(('_x', 'phi'))[0]
-        theta_pred = mpc.data.prediction(('_x', 'theta'))[0]
-        for i in range(phi_pred.shape[1]):
-            pred_lines[i].set_data(phi_pred[:,i], theta_pred[:,i])
-        phi = mpc.data['_x', 'phi']
-        theta = mpc.data['_x', 'theta']
-        res_lines[0].set_data(phi, theta)
-        ax.relim()
-        ax.autoscale()
-
-        # graphics.plot_results()
-        # #graphics.plot_predictions()
-        # graphics.reset_axes()
+        if user_anim:
+            phi_pred = mpc.data.prediction(('_x', 'phi'))[0]
+            theta_pred = mpc.data.prediction(('_x', 'theta'))[0]
+            for i in range(phi_pred.shape[1]):
+                pred_lines[i].set_data(phi_pred[:,i], theta_pred[:,i])
+            phi = mpc.data['_x', 'phi']
+            theta = mpc.data['_x', 'theta']
+            res_lines[0].set_data(phi, theta)
+            ax.relim()
+            ax.autoscale()
+        else:
+            graphics.plot_results()
+            #graphics.plot_predictions()
+            graphics.reset_axes()
         plt.show()
         plt.pause(0.01)
 
@@ -118,4 +140,4 @@ input('Press any key to exit.')
 
 # Store results:
 if store_results:
-    do_mpc.data.save_results([mpc, simulator], 'kite')
+    do_mpc.data.save_results([simulator], 'kite')
