@@ -16,3 +16,5 @@ documentation/source/api/
 examples/kite/results/
 
 examples/kite/.ipynb_checkpoints/
+
+examples/kite/models/
