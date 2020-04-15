@@ -38,18 +38,21 @@ from template_mpc import template_mpc
 from template_simulator import template_simulator
 
 """ User settings: """
-show_animation = False
+show_animation = True
 user_anim = True
 store_results = True
 
 """
 Get configured do-mpc modules:
 """
-w_ref = 10+5*np.random.rand()
-E_0 = 6+np.random.rand()
+w_ref = 6+10*np.random.rand()
+E_0 = 5+3*np.random.rand()
+
+# (theta,phi)
+setpoint = (0.2+0.6*np.random.rand(),-0.5+np.random.rand())
 
 model = template_model()
-mpc = template_mpc(model, w_ref, E_0)
+mpc = template_mpc(model, w_ref, E_0, setpoint=setpoint)
 simulator = template_simulator(model, w_ref, E_0)
 estimator = do_mpc.estimator.StateFeedback(model)
 

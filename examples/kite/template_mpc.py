@@ -29,7 +29,7 @@ sys.path.append('../../')
 import do_mpc
 
 
-def template_mpc(model, w_ref, E_0):
+def template_mpc(model, w_ref, E_0, setpoint=None):
     """
     --------------------------------------------------------------------------
     template_mpc: tuning parameters
@@ -38,7 +38,7 @@ def template_mpc(model, w_ref, E_0):
     mpc = do_mpc.controller.MPC(model)
 
     setup_mpc = {
-        'n_horizon': 60,
+        'n_horizon': 80,
         'n_robust': 0,
         'open_loop': 0,
         't_step': 0.15,
@@ -49,8 +49,14 @@ def template_mpc(model, w_ref, E_0):
 
     mpc.set_param(**setup_mpc)
 
-    lterm = -model.aux['T_F']/1e4
-    mpc.set_objective(mterm=DM(0), lterm=lterm)
+    if setpoint is None:
+        lterm = -model.aux['T_F']/1e4
+        mpc.set_objective(mterm=DM(0), lterm=lterm)
+    else:
+        lterm = (model.x['theta']-setpoint[0])**2+(model.x['phi']-setpoint[1])**2
+        mterm = (model.x['theta']-setpoint[0])**2+(model.x['phi']-setpoint[1])**2
+        mpc.set_objective(mterm=mterm, lterm=lterm)
+
     mpc.set_rterm(u_tilde=0.5)
 
 
