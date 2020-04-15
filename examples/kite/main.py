@@ -67,7 +67,7 @@ m_psi, r_psi = (ub_psi+lb_psi)/2, (ub_psi-lb_psi)/2
 # How close can the intial state be to the bounds?
 # tightness=1 -> Initial state could be on the bounds.
 # tightness=0 -> Initial state will be at the center of the feasible range.
-tightness = 0.8
+tightness = 0.6
 theta_0 = m_theta-tightness*r_theta+2*tightness*r_theta*np.random.rand()
 phi_0 = m_phi-tightness*r_phi+2*tightness*r_phi*np.random.rand()
 psi_0 = m_psi-tightness*r_psi+2*tightness*r_psi*np.random.rand()

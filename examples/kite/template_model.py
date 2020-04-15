@@ -29,7 +29,7 @@ sys.path.append('../../')
 import do_mpc
 
 
-def template_model():
+def template_model(state_feedback = True):
     """
     --------------------------------------------------------------------------
     template_model: Variables / RHS / AUX
@@ -66,6 +66,11 @@ def template_model():
 
     model.set_expression('T_F', T_F)
     model.set_expression('height_kite', height_kite)
+
+    if not state_feedback:
+        model.set_meas('phi', phi)
+        model.set_meas('theta', theta)
+        model.set_meas('u_tilde', u_tilde)
 
 
     # Differential equations
