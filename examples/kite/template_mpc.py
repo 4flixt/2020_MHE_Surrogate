@@ -29,7 +29,7 @@ sys.path.append('../../')
 import do_mpc
 
 
-def template_mpc(model, w_ref, E_0, setpoint=None):
+def template_mpc(model, w_ref, E_0, setpoint=None, h_min=100):
     """
     --------------------------------------------------------------------------
     template_mpc: tuning parameters
@@ -71,7 +71,7 @@ def template_mpc(model, w_ref, E_0, setpoint=None):
     mpc.bounds['lower','_u','u_tilde'] = -10
     mpc.bounds['upper','_u','u_tilde'] = 10
 
-    h_min = 100.0          # minimum height [m]
+    h_min = h_min          # minimum height [m]
 
     mpc.set_nl_cons('height_kite',
         -model.aux['height_kite'],

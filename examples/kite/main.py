@@ -47,12 +47,13 @@ Get configured do-mpc modules:
 """
 w_ref = 6+10*np.random.rand()
 E_0 = 5+3*np.random.rand()
+h_min = 80+40*np.random.rand()
 
 # (theta,phi)
 setpoint = (0.2+0.6*np.random.rand(),-0.5+np.random.rand())
 
 model = template_model()
-mpc = template_mpc(model, w_ref, E_0, setpoint=setpoint)
+mpc = template_mpc(model, w_ref, E_0, h_min=h_min)
 simulator = template_simulator(model, w_ref, E_0)
 estimator = do_mpc.estimator.StateFeedback(model)
 
