@@ -58,7 +58,7 @@ simulator = template_simulator(model, w_ref, E_0)
 """
 LSTM estimator
 """
-rnn_model = '006'
+rnn_model = '009'
 
 with open('./models/{model}_RNN/{model}_RNN_config.pkl'.format(model=rnn_model),'rb') as f:
     model_config = pickle.load(f)
