@@ -70,8 +70,8 @@ def template_model():
 
     model.set_meas('phi', phi)
     model.set_meas('theta', theta)
-    model.set_meas('u_tilde', u_tilde)
     model.set_meas('E_0', E_0)
+    model.set_meas('u_tilde', u_tilde)
 
 
     # Differential equations
