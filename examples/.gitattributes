@@ -1,0 +1,1 @@
+examples/kite/results/* filter=lfs diff=lfs merge=lfs -text
